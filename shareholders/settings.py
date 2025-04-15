@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'holders.apps.HoldersConfig',
     'rest_framework',
     'django_elasticsearch_dsl',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
