@@ -10,7 +10,7 @@
   <section class="section">
     <div class="container mb-5">
       <h1 class="title">
-        Search shareholders
+        Enter your symbol{% if query %}({{ query }}){% endif %}
       </h1>
       <form method="GET">
         <div class="field has-addons">
@@ -27,23 +27,36 @@
     </div>
 
     <div class="container">
-
-     {% if shareholders %}
-     {% for shareholder in shareholders %}
-      <article class="media">
-        <div class="media-content">
-          <div class="content">
-              <a href='{% url "holders:shareholder_detail" shareholder.meta.id %}'>
-                <p>
-                    <strong>{{ shareholder.shareholder_name }}</strong> <small>{{ shareholder.shareholder_instrument_id }}</small>
-                </p>
-              </a>
-          </div>
-        </div>
-      </article>
-      {% endfor %}
+      {% if shareholders %}
+        <table class="table is-fullwidth is-striped is-hoverable">
+          <thead>
+            <tr>
+              <th>نماد</th>
+              <th>نام سهام‌دار</th>
+              <th>کد ابزار مالی</th>
+              <th>کد سهام‌دار</th>
+              <th>درصد مالکیت</th>
+              <th>تعداد سهام</th>
+              <th>تاریخ</th>
+              <th>تغییر</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for shareholder in shareholders %}
+            <tr>
+              <td>{{ shareholder.symbol }}</td>
+              <td>{{ shareholder.shareholder_name }}</td>
+              <td>{{ shareholder.shareholder_instrument_id }}</td>
+              <td>{{ shareholder.shareholder_id }}</td>
+              <td>{{ shareholder.shareholder_percentage }}</td>
+              <td>{{ shareholder.shareholder_shares }}</td>
+              <td>{{ shareholder.date }}</td>
+              <td>{{ shareholder.change }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       {% endif %}
-
     </div>
   </section>
   </body>

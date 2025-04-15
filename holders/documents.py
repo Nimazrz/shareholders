@@ -11,4 +11,13 @@ class ShareholdersHistoryDocument(Document):
 
     class Django:
         model = ShareholdersHistory
-        fields =['shareholder_name', 'shareholder_instrument_id']
+        fields = [
+            'symbol',
+            'shareholder_name',
+            'shareholder_instrument_id',
+            'shareholder_id',
+            'shareholder_percentage',
+            'shareholder_shares',
+            'date',
+            'change',
+        ]
