@@ -28,6 +28,11 @@
 
     <div class="container">
       {% if shareholders %}
+          <div>
+            search time = {{ search_time }}
+              <br>
+            {{ shareholders | length }}  records
+          </div>
         <table class="table is-fullwidth is-striped is-hoverable">
           <thead>
             <tr>

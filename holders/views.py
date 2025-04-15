@@ -40,8 +40,9 @@ def index(request):
         query = MultiMatch(query=q, fields=["symbol"], fuzziness="AUTO")
         all_hits = get_all_hits(query)
         end = time.time()
-        print(end - start)
+        search_time = end - start
         context["shareholders"] = [hit["_source"] for hit in all_hits]
+        context["search_time"] = search_time
     return render(request, "index.html", context)
 
 
