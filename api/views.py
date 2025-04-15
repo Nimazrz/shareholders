@@ -8,7 +8,7 @@ class ShareholdersHistoryDocumentView(DocumentViewSet):
     document = ShareholdersHistoryDocument
     serializer_class = ShareholdersHistoryDocumentSerializer
     filter_backends = [FilteringFilterBackend, CompoundSearchFilterBackend]
-    search_fields = ('symbol', 'shareholder_name')
+    search_fields = ('symbol',)
     filter_fields = {
         'symbol': 'symbol.raw',
         'date': 'date',
