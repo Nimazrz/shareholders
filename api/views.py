@@ -1,13 +1,11 @@
+from django.core.cache import cache
+from elasticsearch_dsl.query import MultiMatch
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-from django_elasticsearch_dsl_drf.filter_backends import (
-    FilteringFilterBackend,
-    CompoundSearchFilterBackend
-)
 from holders.documents import ShareholdersHistoryDocument
 from .serializers import ShareholdersHistoryDocumentSerializer
-from .tasks import cache_search_results
+from django_elasticsearch_dsl_drf.filter_backends import FilteringFilterBackend, CompoundSearchFilterBackend
+from rest_framework.response import Response
 import time
-from django.core.cache import cache
 
 
 class ShareholdersHistoryDocumentView(DocumentViewSet):
@@ -20,20 +18,36 @@ class ShareholdersHistoryDocumentView(DocumentViewSet):
         'date': 'date',
     }
 
-    def filter_queryset(self, queryset):
-        query = self.request.query_params.get('q')
-        if query:
-            stat = time.time()
-            key = f'search:{query}'
+    def list(self, request, *args, **kwargs):
+        query = request.query_params.get("q")
+        if not query:
+            return super().list(request, *args, **kwargs)
 
-            if not cache.get(key):
-                print(f"⏳ Not found in cache. Caching '{query}'...")
-                cache_search_results.delay(query)
-                end = time.time()
-                print(f"⏱️ Celery task queued {end - stat} seconds")
-            else:
-                end = time.time()
-                print(end - stat)
-                print(f"✅ Found in cache: '{query}'")
+        cache_key = f"search:{query}"
+        start = time.time()
+        cached_result = cache.get(cache_key)
 
-        return super().filter_queryset(queryset)
+        if cached_result:
+            print("✅ Result from Redis cache")
+            end = time.time()
+            return Response({
+                "query": query,
+                "count": len(cached_result),
+                "results": cached_result,
+                "search_time": end - start
+            })
+        else:
+            print("🔍 Querying Elasticsearch...")
+            es_query = MultiMatch(query=query, fields=["symbol"], fuzziness="AUTO")
+            search = ShareholdersHistoryDocument.search().query(es_query)[:10000]
+            hits = [hit.to_dict() for hit in search]
+
+            cache.set(cache_key, hits, timeout=600)
+            print(f"✅ Cached {len(hits)} items for query: {query}")
+            end = time.time()
+            return Response({
+                "query": query,
+                "count": len(hits),
+                "results": hits,
+                "search_time": end - start
+            })
