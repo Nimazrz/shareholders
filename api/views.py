@@ -28,7 +28,6 @@ class ShareholdersHistoryDocumentView(DocumentViewSet):
         cached_result = cache.get(cache_key)
 
         if cached_result:
-            print("✅ Result from Redis cache")
             end = time.time()
             return Response({
                 "query": query,
@@ -37,13 +36,11 @@ class ShareholdersHistoryDocumentView(DocumentViewSet):
                 "search_time": end - start
             })
         else:
-            print("🔍 Querying Elasticsearch...")
             es_query = MultiMatch(query=query, fields=["symbol"], fuzziness="AUTO")
             search = ShareholdersHistoryDocument.search().query(es_query)[:10000]
             hits = [hit.to_dict() for hit in search]
 
             cache.set(cache_key, hits, timeout=600)
-            print(f"✅ Cached {len(hits)} items for query: {query}")
             end = time.time()
             return Response({
                 "query": query,

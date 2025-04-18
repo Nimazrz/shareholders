@@ -43,13 +43,11 @@ def index(request):
         cached_result = r.get(cache_key)
 
         if cached_result:
-            print("✅ Result from Redis cache")
             all_hits = json.loads(cached_result)
             context["shareholders"] = all_hits
             end = time.time()
             context["search_time"] = end - start
         else:
-            print("🔍 Querying Elasticsearch...")
             query = MultiMatch(query=q, fields=["symbol"], fuzziness="AUTO")
             all_hits = get_all_hits(query)
             all_hits = [hit["_source"] for hit in all_hits]
